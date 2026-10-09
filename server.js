@@ -18,6 +18,7 @@ import {
   startSession,
   endSession,
 } from "./lib/auth.js";
+import { renderPage, sitemap, siteOrigin } from "./lib/seo.js";
 import { validText, sanitizeProperty } from "./lib/properties.js";
 if (!get("initialized", "initialized")) {
   if (process.env.SEED_DEMO !== "false")
@@ -32,6 +33,13 @@ for (const sample of seed) {
 }
 const dummyHash = await hashPassword("dummy-password-for-timing");
 const origin = process.env.APP_ORIGIN;
+const siteUrl = siteOrigin(
+  process.env.SITE_URL || (origin?.startsWith("https://") ? origin : ""),
+);
+const publicProperties = () =>
+  all("properties")
+    .filter((p) => !p.archived && (p.demo || activeOwner(p)))
+    .map(publicProperty);
 if (origin && new URL(origin).origin !== origin)
   throw Error("APP_ORIGIN must be an origin without a trailing slash.");
 const respond = (res, status, body) => {
@@ -98,6 +106,7 @@ const server = http.createServer(async (req, res) => {
   const pathname = new URL(req.url, "http://localhost").pathname;
   try {
     if (pathname.startsWith("/api/")) {
+      res.setHeader("X-Robots-Tag", "noindex, nofollow");
       if (!["GET", "HEAD"].includes(req.method)) {
         const expected = origin || "http://" + req.headers.host;
         if (req.headers.origin !== expected)
@@ -428,6 +437,52 @@ const server = http.createServer(async (req, res) => {
         return res.end();
       }
     }
+    if (pathname === "/robots.txt") {
+      res.writeHead(200, { "Content-Type": "text/plain; charset=utf-8" });
+      return res.end(
+        siteUrl
+          ? `User-agent: *
+Disallow: /api/
+Disallow: /agent
+Sitemap: ${siteUrl}/sitemap.xml
+`
+          : "User-agent: *\nDisallow: /\n",
+      );
+    }
+    if (pathname === "/sitemap.xml") {
+      res.writeHead(200, { "Content-Type": "application/xml; charset=utf-8" });
+      return res.end(sitemap(publicProperties(), siteUrl));
+    }
+    const isPage =
+      pathname === "/" || pathname === "/index.html" || !extname(pathname);
+    if (
+      pathname === "/index.html" ||
+      (pathname.length > 1 && pathname.endsWith("/"))
+    ) {
+      res.writeHead(308, {
+        Location:
+          pathname === "/index.html" ? "/" : pathname.replace(/\/+$/, ""),
+      });
+      return res.end();
+    }
+    if (isPage) {
+      const template = readFileSync(
+        vite ? "index.html" : "dist/index.html",
+        "utf8",
+      );
+      const page = renderPage(template, pathname, publicProperties(), siteUrl);
+      const html = vite
+        ? await vite.transformIndexHtml(req.url, page.html)
+        : page.html;
+      res.writeHead(page.status, {
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "no-store",
+        ...(pathname === "/agent"
+          ? { "X-Robots-Tag": "noindex, nofollow" }
+          : {}),
+      });
+      return res.end(html);
+    }
     if (vite) return vite.middlewares(req, res);
     const root = resolve("dist");
     let decoded;
@@ -442,7 +497,10 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(403);
       return res.end();
     }
-    if (!existsSync(file) || !extname(file)) file = join(root, "index.html");
+    if (!existsSync(file)) {
+      res.writeHead(404);
+      return res.end("Not found");
+    }
     try {
       const types = {
         ".html": "text/html",

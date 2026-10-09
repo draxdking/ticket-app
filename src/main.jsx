@@ -1,6 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
 import { createRoot } from "react-dom/client";
 import "./style.css";
+import { propertyPath, updateSeo } from "./seo.js";
+const boot = JSON.parse(
+  document.getElementById("page-data")?.textContent || "{}",
+);
+const pageForPath = (path) =>
+  path === "/agent"
+    ? "dashboard"
+    : path === "/for-agents"
+      ? "about"
+      : path === "/" || path.startsWith("/properties/")
+        ? "discover"
+        : "notfound";
 import {
   AuthForm,
   Profile,
@@ -54,12 +66,13 @@ const types = [
 function App() {
   const [user, User] = useState(null),
     [authReady, AuthReady] = useState(false);
-  const [page, S] = useState("discover"),
+  const [routePath, Route] = useState(window.location.pathname);
+  const [page, S] = useState(pageForPath(window.location.pathname)),
     [tab, T] = useState("overview"),
-    [properties, P] = useState([]),
+    [properties, P] = useState(boot.properties || []),
     [leads, L] = useState([]),
     [viewings, V] = useState([]),
-    [loading, Loading] = useState(true),
+    [loading, Loading] = useState(!boot.properties),
     [error, E] = useState(""),
     [notice, N] = useState("");
   const [purpose, Purpose] = useState("All"),
@@ -68,7 +81,11 @@ function App() {
     [query, Q] = useState(""),
     [max, Max] = useState(""),
     [sort, Sort] = useState("featured");
-  const [selected, Selected] = useState(null),
+  const [selected, Selected] = useState(
+      (boot.properties || []).find(
+        (p) => propertyPath(p) === window.location.pathname,
+      ) || null,
+    ),
     [editor, Editor] = useState(null),
     [viewForm, ViewForm] = useState(false),
     [busy, Busy] = useState(false),
@@ -79,6 +96,11 @@ function App() {
         "properties" + (page === "dashboard" && user ? "?mine=1" : ""),
       );
       P(p);
+      if (routePath.startsWith("/properties/")) {
+        const match = p.find((item) => propertyPath(item) === routePath);
+        Selected(match || null);
+        if (!match) S("notfound");
+      }
       if (user) {
         const [l, v] = await Promise.all([api("leads"), api("viewings")]);
         L(l);
@@ -108,7 +130,7 @@ function App() {
   }, []);
   useEffect(() => {
     if (authReady) refresh();
-  }, [authReady, user, page]);
+  }, [authReady, user, page, routePath]);
   useEffect(() => {
     if (notice) {
       const t = setTimeout(() => N(""), 5000);
@@ -135,19 +157,45 @@ function App() {
       Busy(false);
     }
   }
+  function navigate(path) {
+    window.history.pushState({}, "", path);
+    Route(path);
+    S(pageForPath(path));
+  }
+  useEffect(() => {
+    const onPop = () => {
+      Route(window.location.pathname);
+      S(pageForPath(window.location.pathname));
+      Selected(null);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+  useEffect(() => {
+    updateSeo(routePath, properties, boot.siteUrl || "");
+  }, [routePath, properties]);
   function go(p) {
     if (p !== page) {
       P([]);
       Loading(true);
     }
-    S(p);
+    Selected(null);
+    navigate(
+      p === "dashboard" ? "/agent" : p === "about" ? "/for-agents" : "/",
+    );
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
   function open(p) {
+    navigate(propertyPath(p));
     Selected(p);
     Sent(false);
     E("");
   }
+  function closeProperty() {
+    Selected(null);
+    navigate("/");
+  }
+  const HeroHeading = routePath === "/" ? "h1" : "h2";
   const cities = [
     ...new Set([
       "Lagos",
@@ -179,7 +227,7 @@ function App() {
     <>
       <header className="header">
         <a
-          href="#"
+          href="/"
           className="brand"
           onClick={(e) => {
             e.preventDefault();
@@ -192,18 +240,30 @@ function App() {
           homestead<span className="brand-dot">.</span>
         </a>
         <nav>
-          <button
+          <a
+            href="/"
             className={page === "discover" ? "active" : ""}
-            onClick={() => go("discover")}
+            onClick={(e) => {
+              if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                e.preventDefault();
+                go("discover");
+              }
+            }}
           >
             Find a property
-          </button>
-          <button
+          </a>
+          <a
+            href="/for-agents"
             className={page === "about" ? "active" : ""}
-            onClick={() => go("about")}
+            onClick={(e) => {
+              if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                e.preventDefault();
+                go("about");
+              }
+            }}
           >
             For agents
-          </button>
+          </a>
         </nav>
         <button className="button dark small" onClick={() => go("dashboard")}>
           Agent workspace <span>↗</span>
@@ -222,6 +282,22 @@ function App() {
           ✓ {notice}
         </div>
       )}
+      {page === "notfound" && (
+        <main className="empty">
+          <h1>Page not found</h1>
+          <p>This property may no longer be available.</p>
+          <a
+            className="button dark"
+            href="/"
+            onClick={(e) => {
+              e.preventDefault();
+              go("discover");
+            }}
+          >
+            Browse properties
+          </a>
+        </main>
+      )}
       {page === "discover" && (
         <>
           <section className="hero">
@@ -230,10 +306,10 @@ function App() {
                 <span />
                 YOUR NEXT CHAPTER, RIGHT HERE
               </div>
-              <h1>
+              <HeroHeading>
                 A place to live.
                 <br />A place to <em>belong.</em>
-              </h1>
+              </HeroHeading>
               <p>
                 Discover homes and spaces across Nigeria.
                 <br />
@@ -374,7 +450,14 @@ function App() {
                         onClick={() => open(p)}
                         aria-label={"View " + p.title}
                       >
-                        <img src={p.image} alt={p.title} loading="lazy" />
+                        <img
+                          src={p.image}
+                          alt={p.type + " in " + p.location}
+                          width="400"
+                          height="260"
+                          loading="lazy"
+                          decoding="async"
+                        />
                         <span className="tag">
                           FOR {p.purpose.toUpperCase()}
                         </span>
@@ -385,9 +468,23 @@ function App() {
                       </button>
                       <div className="card-body">
                         <div className="property-location">⌖ {p.location}</div>
-                        <button className="card-title" onClick={() => open(p)}>
+                        <a
+                          className="card-title"
+                          href={propertyPath(p)}
+                          onClick={(e) => {
+                            if (
+                              !e.ctrlKey &&
+                              !e.metaKey &&
+                              !e.shiftKey &&
+                              e.button === 0
+                            ) {
+                              e.preventDefault();
+                              open(p);
+                            }
+                          }}
+                        >
                           {p.title}
-                        </button>
+                        </a>
                         <div className="property-specs">
                           <span>{p.beds} beds</span>
                           <span>{p.baths} baths</span>
@@ -842,7 +939,7 @@ function App() {
         <footer>
           <a
             className="brand"
-            href="#"
+            href="/"
             onClick={(e) => {
               e.preventDefault();
               go("discover");
@@ -857,13 +954,13 @@ function App() {
         </footer>
       )}
       {selected && (
-        <Modal title="Property details" close={() => Selected(null)}>
+        <Modal title="Property details" close={closeProperty}>
           <Gallery key={selected.id} property={selected} />
           <div className="detail-content">
             <span className="eyebrow muted">
               {selected.type} · FOR {selected.purpose.toUpperCase()}
             </span>
-            <h2>{selected.title}</h2>
+            <h1 className="property-heading">{selected.title}</h1>
             <p className="property-location">⌖ {selected.location}</p>
             <h3>
               {money(selected.price)}
@@ -915,7 +1012,7 @@ function App() {
               <div className="success" role="status">
                 <h3>Enquiry received.</h3>
                 <p>Your enquiry is now in the agent workspace.</p>
-                <button className="button dark" onClick={() => Selected(null)}>
+                <button className="button dark" onClick={closeProperty}>
                   Keep exploring
                 </button>
               </div>

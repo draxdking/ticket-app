@@ -66,3 +66,13 @@ Uploaded photos work without external image services. Legacy sample photos use i
 ## Remaining launch work
 
 This is an improved development starter, not an already deployed service. Set up hosting, HTTPS, disk/database backups and a privacy policy before using real client information. Email verification and password recovery are not implemented yet; agents should keep their credentials safely. Account sign-up does not verify agent credentials or property ownership. Rate limits are per socket IP in one process and reset on restart; configure a persistent, proxy-aware limit at your hosting edge for production. Uploaded files removed from a gallery remain on disk so existing listings are never broken; add a retention cleanup job before operating at scale. No automatic email, SMS or appointment notifications are sent. Property availability, documents and charges must be verified independently.
+
+## Search engines and sharing
+
+Public pages are served with readable HTML before JavaScript runs. Every public listing has a stable `/properties/PROPERTY_ID` URL, its own location/type title and description, social sharing tags, and (for real listings) Schema.org RealEstateListing data. The homepage and agent-information page are public; the authenticated workspace remains private. Removed/archived listings and unknown URLs return HTTP 404. `/index.html` and trailing slashes redirect to the preferred URL.
+
+When hosting, set `SITE_URL` to your actual public HTTPS origin, for example `https://your-domain.example`, without a path or trailing slash. An HTTPS `APP_ORIGIN` is used as the default if `SITE_URL` is not supplied. This generates absolute canonical, sharing and sitemap URLs. Do not use the example domain on your live site. Local development has no canonical domain and is marked `noindex`; its robots file blocks crawling.
+
+`/sitemap.xml` lists public pages and active, real property listings. Demo properties, archived listings, suspended-agent listings and private pages are excluded. `/robots.txt` supplies the sitemap location on configured public sites and blocks API/workspace crawling. Demo detail pages remain `noindex` even when assigned to an agent. No ranking, review or ownership-verification claims are fabricated in structured data.
+
+After deploying real listings, verify your domain in Google Search Console and submit `https://YOUR_DOMAIN/sitemap.xml`. Check pages with Google's URL Inspection and structured-data tools. Search indexing/rankings are not guaranteed by these changes; keep availability, prices, photographs and property descriptions accurate. No Search Console verification or submission has been performed by this project.

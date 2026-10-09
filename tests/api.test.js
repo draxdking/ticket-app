@@ -18,6 +18,7 @@ test("accounts isolate records; photos, fees, contact details and sessions persi
         NODE_ENV: "production",
         COOKIE_SECURE: "false",
         APP_ORIGIN: base,
+        SITE_URL: "https://homestead.example",
         SEED_DEMO: "false",
         PORT: "3109",
         DATA_DIR: dir,
@@ -221,6 +222,36 @@ test("accounts isolate records; photos, fees, contact details and sessions persi
     );
     assert.equal(r.status, 201);
     const saved = r.body;
+    const detailResponse = await fetch(base + "/properties/" + saved.id);
+    assert.equal(detailResponse.status, 200);
+    const html = await detailResponse.text();
+    assert.match(html, /3-bedroom Apartment for rent in Ikeja, Lagos/);
+    assert.match(html, /<meta name="description"/);
+    assert.match(
+      html,
+      /<link rel="canonical" href="https:\/\/homestead.example\/properties\//,
+    );
+    assert.match(html, /application\/ld\+json/);
+    assert.match(html, /"@type":"RealEstateListing"/);
+    assert.match(html, /A test home with space to grow/);
+    assert.match(html, /Total initial payment: ₦4,300,000/);
+    assert(!html.includes("a@example.com"));
+    assert.match(
+      await (await fetch(base + "/sitemap.xml")).text(),
+      new RegExp(saved.id),
+    );
+    assert.match(
+      await (await fetch(base + "/robots.txt")).text(),
+      /Disallow: \/api\//,
+    );
+    assert.match(
+      await (await fetch(base + "/agent")).text(),
+      /content="noindex,follow"/,
+    );
+    assert.equal((await fetch(base + "/properties/missing")).status, 404);
+    assert.equal((await fetch(base + "/missing-page")).status, 404);
+    assert.equal((await fetch(base + "/missing.js")).status, 404);
+
     assert.equal(saved.ownerId, aId);
     assert.equal(saved.fees.caution.refundable, true);
     assert.equal(
@@ -405,6 +436,11 @@ test("accounts isolate records; photos, fees, contact details and sessions persi
       null,
     );
     assert.equal((await request("/api/properties")).body.length, 0);
+    assert.equal((await fetch(base + "/properties/" + saved.id)).status, 404);
+    assert(
+      !(await (await fetch(base + "/sitemap.xml")).text()).includes(saved.id),
+    );
+
     await request("/api/users/" + aId, "PUT", { active: true }, b);
     r = await request("/api/auth/login", "POST", {
       email: "a@example.com",
@@ -432,6 +468,11 @@ test("accounts isolate records; photos, fees, contact details and sessions persi
       200,
     );
     assert.equal((await request("/api/properties")).body.length, 0);
+    assert.equal((await fetch(base + "/properties/" + saved.id)).status, 404);
+    assert(
+      !(await (await fetch(base + "/sitemap.xml")).text()).includes(saved.id),
+    );
+
     assert.equal(
       (await request("/api/leads", "GET", null, resumed)).body.length,
       1,

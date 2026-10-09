@@ -89,7 +89,8 @@ nav {
   display: flex;
   gap: 35px;
 }
-nav button {
+nav button,
+nav a {
   background: none;
   border: 0;
   padding: 12px 0;
@@ -1639,4 +1640,49 @@ aside {
 .workspace-main,
 .panel {
   min-width: 0;
+}
+.seo-fallback {
+  padding-top: 40px;
+  padding-bottom: 40px;
+  line-height: 1.7;
+}
+.seo-fallback section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+}
+.seo-fallback img {
+  max-width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+.seo-fallback article {
+  background: white;
+  padding: 18px;
+  border: 1px solid #dce2d2;
+  border-radius: 6px;
+}
+.seo-fallback article h2 {
+  font-size: 22px;
+  letter-spacing: -0.5px;
+}
+.hero h2 {
+  font-size: 57px;
+  line-height: 1.13;
+  margin: 24px 0 22px;
+  font-weight: 500;
+}
+.detail-content .property-heading {
+  font-size: 30px;
+  margin: 15px 0;
+}
+@media (max-width: 1050px) {
+  .hero h2 {
+    font-size: 46px;
+  }
+}
+@media (max-width: 420px) {
+  .hero h2 {
+    font-size: 42px;
+  }
 }
