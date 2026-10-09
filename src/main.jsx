@@ -763,7 +763,7 @@ function App() {
                   <tbody>
                     {properties.map((p) => (
                       <tr key={p.id}>
-                        <td>
+                        <td data-label="Property">
                           <div className="table-property">
                             <img src={p.image} alt="" />
                             <div>
@@ -772,18 +772,18 @@ function App() {
                             </div>
                           </div>
                         </td>
-                        <td>
+                        <td data-label="Price">
                           {money(p.price)}
                           {p.purpose === "Rent" && <small> / year</small>}
                         </td>
-                        <td>
+                        <td data-label="Type">
                           <span className="status">
                             {p.archived
                               ? "Archived"
                               : "For " + p.purpose.toLowerCase()}
                           </span>
                         </td>
-                        <td>
+                        <td data-label="Actions">
                           <div className="actions">
                             <button onClick={() => Editor({ ...p })}>
                               Edit
