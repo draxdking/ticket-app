@@ -11,11 +11,11 @@ test("accounts isolate records; photos, fees, contact details and sessions persi
   const dir = mkdtempSync(join(tmpdir(), "homestead-test-")),
     base = "http://127.0.0.1:3109";
   let child;
-  async function start() {
+  async function start(mode = "production") {
     child = spawn(process.execPath, ["server.js"], {
       env: {
         ...process.env,
-        NODE_ENV: "production",
+        NODE_ENV: mode,
         COOKIE_SECURE: "false",
         APP_ORIGIN: base,
         SITE_URL: "https://homestead.example",
@@ -503,6 +503,13 @@ test("accounts isolate records; photos, fees, contact details and sessions persi
     const home = await fetch(base);
     assert.equal(home.status, 200);
     assert.match(await home.text(), /Homestead/);
+    await stop();
+    await start("development");
+    const viteClient = await fetch(base + "/@vite/client");
+    assert.equal(viteClient.status, 200);
+    assert.match(viteClient.headers.get("content-type"), /javascript/);
+    assert(!(await viteClient.text()).includes("<html"));
+    assert.equal((await fetch(base + "/src/main.jsx")).status, 200);
   } finally {
     if (child?.exitCode === null) await stop();
     rmSync(dir, { recursive: true, force: true });

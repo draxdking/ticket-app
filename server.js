@@ -453,6 +453,9 @@ Sitemap: ${siteUrl}/sitemap.xml
       res.writeHead(200, { "Content-Type": "application/xml; charset=utf-8" });
       return res.end(sitemap(publicProperties(), siteUrl));
     }
+    // Vite's extensionless module URLs are assets, not public SEO pages.
+    if (vite && (pathname.startsWith("/@") || pathname.startsWith("/__vite")))
+      return vite.middlewares(req, res);
     const isPage =
       pathname === "/" || pathname === "/index.html" || !extname(pathname);
     if (
