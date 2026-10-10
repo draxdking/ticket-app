@@ -66,6 +66,7 @@ const types = [
 function App() {
   const [user, User] = useState(null),
     [authReady, AuthReady] = useState(false);
+  const [mobileMenu, MobileMenu] = useState(false);
   const [routePath, Route] = useState(window.location.pathname);
   const [page, S] = useState(pageForPath(window.location.pathname)),
     [tab, T] = useState("overview"),
@@ -158,6 +159,7 @@ function App() {
     }
   }
   function navigate(path) {
+    MobileMenu(false);
     window.history.pushState({}, "", path);
     Route(path);
     S(pageForPath(path));
@@ -225,7 +227,12 @@ function App() {
     properties.find((p) => p.id === id)?.location || "Removed property";
   return (
     <>
-      <header className="header">
+      <header
+        className="header"
+        onKeyDown={(e) => {
+          if (e.key === "Escape") MobileMenu(false);
+        }}
+      >
         <a
           href="/"
           className="brand"
@@ -239,7 +246,15 @@ function App() {
           </span>
           homestead<span className="brand-dot">.</span>
         </a>
-        <nav>
+        <button
+          className="mobile-menu-toggle"
+          aria-expanded={mobileMenu}
+          aria-controls="main-navigation"
+          onClick={() => MobileMenu(!mobileMenu)}
+        >
+          {mobileMenu ? "Close" : "Menu"}
+        </button>
+        <nav id="main-navigation" className={mobileMenu ? "mobile-open" : ""}>
           <a
             href="/"
             className={page === "discover" ? "active" : ""}
@@ -265,8 +280,18 @@ function App() {
             For agents
           </a>
         </nav>
-        <button className="button dark small" onClick={() => go("dashboard")}>
-          Agent workspace <span>↗</span>
+        <button
+          aria-label="Agent workspace"
+          className="button dark small"
+          onClick={() => go("dashboard")}
+        >
+          <span className="workspace-label">Agent workspace</span>
+          <span className="workspace-short" aria-hidden="true">
+            Agent
+          </span>{" "}
+          <span className="workspace-arrow" aria-hidden="true">
+            ↗
+          </span>
         </button>
       </header>
       {error && (

@@ -1919,3 +1919,182 @@ textarea {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+.mobile-menu-toggle,
+.workspace-short {
+  display: none;
+}
+@media (max-width: 760px) {
+  .header {
+    height: 64px;
+    position: relative;
+    gap: 8px;
+    padding: 0 14px;
+  }
+  .header .brand {
+    margin-right: auto;
+    font-size: 21px;
+    gap: 5px;
+  }
+  .header .brand-icon {
+    font-size: 28px;
+  }
+  .mobile-menu-toggle {
+    display: block;
+    background: transparent;
+    border: 1px solid #d7dfd0;
+    border-radius: 5px;
+    padding: 0 12px;
+    min-height: 44px;
+    font-size: 12px;
+  }
+  .header .workspace-label,
+  .header .workspace-arrow {
+    display: none;
+  }
+  .header .workspace-short {
+    display: inline;
+  }
+  .header .button {
+    min-height: 44px;
+    padding: 0 14px;
+    font-size: 12px;
+  }
+  .header nav.mobile-open {
+    display: flex;
+    position: absolute;
+    top: 64px;
+    left: 0;
+    right: 0;
+    z-index: 15;
+    padding: 12px 20px;
+    flex-direction: column;
+    gap: 4px;
+    background: #faf9f6;
+    border-bottom: 1px solid #d7dfd0;
+    box-shadow: 0 12px 20px #173e3315;
+  }
+  .header nav.mobile-open a {
+    padding: 14px 8px;
+    font-size: 14px;
+    min-height: 44px;
+  }
+  .hero-content {
+    padding: 28px 20px;
+  }
+  .hero h1,
+  .hero h2 {
+    font-size: clamp(34px, 9vw, 44px);
+    margin: 16px 0;
+  }
+  .hero p {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  .hero .eyebrow {
+    font-size: 9px;
+    letter-spacing: 1.5px;
+  }
+  .hero-caption {
+    display: none;
+  }
+  .hero-photo {
+    height: 180px;
+  }
+  .public-main {
+    padding: 0 14px;
+  }
+  .search-panel {
+    margin-bottom: 32px;
+  }
+  .search-tabs {
+    padding: 0 14px;
+    gap: 18px;
+  }
+  .search-fields {
+    padding: 18px;
+  }
+  .search-fields input,
+  .search-fields select {
+    font-size: 16px;
+    min-height: 44px;
+    padding-top: 6px;
+  }
+  .search-tabs button,
+  .results-controls input,
+  .results-controls select {
+    min-height: 44px;
+  }
+  .toast {
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+    padding: 14px 18px;
+    font-size: 12px;
+  }
+}
+@media (max-width: 600px) {
+  .hero-photo {
+    display: none;
+  }
+  .search-fields {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+  .section-top h2 {
+    font-size: 28px;
+  }
+  .modal-backdrop {
+    padding: 0;
+  }
+  .modal {
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
+    border-radius: 0;
+  }
+  .close-modal {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    width: 44px;
+    height: 44px;
+    font-size: 26px;
+    z-index: 22;
+  }
+  .detail-content {
+    padding: 24px 20px;
+  }
+  .detail-content .property-heading {
+    font-size: 28px;
+    letter-spacing: -1px;
+  }
+  .gallery-controls button {
+    width: 44px;
+    height: 44px;
+  }
+  .gallery-controls {
+    top: 160px;
+  }
+  .gallery-thumbs button {
+    min-height: 52px;
+  }
+  .workspace {
+    min-height: calc(100dvh - 64px);
+  }
+  aside > button {
+    min-height: 44px;
+  }
+}
+@media (max-width: 360px) {
+  .header .brand {
+    font-size: 19px;
+  }
+  .mobile-menu-toggle {
+    padding: 0 10px;
+  }
+  .header .button {
+    padding: 0 12px;
+  }
+}
