@@ -30,7 +30,7 @@ To create an administrator without prior registration, supply a strong `ADMIN_PA
 - Public property search by sale/rent, city, type, budget and neighbourhood, with price sorting.
 - Agent sign-up/sign-in, HTTP-only sessions, scrypt password hashes, ownership checks and sign-out.
 - Upload up to 12 JPEG/PNG/WebP photos; choose a cover and reorder photos. Browser resizing and server-side image decoding/re-encoding reduce size and strip metadata. Inputs are limited to 25 megapixels; the browser accepts files up to 15 MB and uploads compressed files under 5 MB. Server output is JPEG up to 1600 × 1600.
-- Swipe thumbnails or use gallery controls to browse listing photos.
+- Select thumbnails, which wrap into rows, or use gallery controls to browse listing photos. Phone and tablet dashboard listings stack into cards; forms and menus fit the viewport without sideways scrolling.
 - WhatsApp links use the assigned agent's Nigerian mobile number and a prepared property-specific message. Opening the link does not send the message automatically. Agents can update their number under **Profile**.
 - Agency, legal/agreement, caution-deposit and service charges have amounts, frequencies and refundability. The initial total includes the property price/annual rent plus the first payment of each listed additional charge. Recurring charges are clearly labelled; rates are entered by the agent, not assumed.
 - Enquiries require contact-sharing consent and are visible only to the listing's agent and administrators.

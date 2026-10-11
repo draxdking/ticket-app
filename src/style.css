@@ -740,13 +740,13 @@ aside > button span {
   margin-top: 15px;
 }
 .table-wrap {
-  overflow-x: auto;
+  overflow: visible;
 }
 table {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
-  white-space: nowrap;
+  white-space: normal;
 }
 th {
   font-size: 10px;
@@ -1461,8 +1461,9 @@ form .button {
 .gallery-thumbs {
   padding: 12px 20px;
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
-  overflow: auto;
+  overflow: visible;
 }
 .gallery-thumbs button {
   padding: 3px;
@@ -1568,7 +1569,7 @@ form .button {
   display: block;
 }
 aside {
-  overflow-x: auto;
+  overflow: visible;
 }
 .activity > .button {
   margin-left: auto;
@@ -1847,45 +1848,6 @@ textarea {
   form textarea {
     font-size: 16px;
   }
-  .table-wrap {
-    overflow: visible;
-  }
-  .table-wrap table,
-  .table-wrap tbody {
-    display: block;
-    width: 100%;
-    white-space: normal;
-  }
-  .table-wrap thead {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-  }
-  .table-wrap tr {
-    display: block;
-    padding: 12px 16px;
-    border-bottom: 1px solid #e0e4d9;
-  }
-  .table-wrap td {
-    display: grid;
-    grid-template-columns: 60px minmax(0, 1fr);
-    align-items: start;
-    gap: 12px;
-    padding: 10px 0;
-    border: 0;
-    overflow-wrap: anywhere;
-  }
-  .table-wrap td::before {
-    content: attr(data-label);
-    font-size: 10px;
-    color: #7a8876;
-    padding-top: 5px;
-  }
-  .table-wrap .actions {
-    flex-wrap: wrap;
-  }
 }
 @media (max-width: 360px) {
   .header .brand {
@@ -2096,5 +2058,118 @@ textarea {
   }
   .header .button {
     padding: 0 12px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .table-wrap {
+    overflow: visible;
+  }
+  .table-wrap table,
+  .table-wrap tbody {
+    display: block;
+    width: 100%;
+    white-space: normal;
+  }
+  .table-wrap thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .table-wrap tr {
+    display: block;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e0e4d9;
+  }
+  .table-wrap td {
+    display: grid;
+    grid-template-columns: 60px minmax(0, 1fr);
+    align-items: start;
+    gap: 12px;
+    padding: 10px 0;
+    border: 0;
+    overflow-wrap: anywhere;
+  }
+  .table-wrap td::before {
+    content: attr(data-label);
+    font-size: 10px;
+    color: #7a8876;
+    padding-top: 5px;
+  }
+  .table-wrap .actions {
+    flex-wrap: wrap;
+  }
+}
+/* One viewport-wide surface; content wraps rather than requiring side scrolling. */
+html,
+body,
+#root {
+  width: 100%;
+  min-width: 0;
+}
+body {
+  overflow-x: hidden;
+  overflow-x: clip;
+}
+main,
+section,
+article,
+aside,
+.gallery,
+.auth-card,
+.overview-grid,
+.stats {
+  min-width: 0;
+}
+.hero {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.workspace {
+  grid-template-columns: 230px minmax(0, 1fr);
+}
+.overview-grid {
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+}
+.photo-editor {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.table-wrap td,
+.activity strong,
+.activity small {
+  overflow-wrap: anywhere;
+}
+.modal {
+  overflow-x: hidden;
+  overflow-x: clip;
+  overflow-y: auto;
+}
+@media (max-width: 1050px) {
+  .workspace {
+    grid-template-columns: 180px minmax(0, 1fr);
+  }
+  .overview-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 760px) {
+  .hero,
+  .workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  aside {
+    flex-wrap: wrap;
+  }
+  aside > button {
+    white-space: normal;
+  }
+  .photo-editor {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 360px) {
+  .photo-editor {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
